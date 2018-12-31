@@ -16,6 +16,10 @@ pub fn turn(device: String, state: String, fast: bool) -> Result<(), TurnError> 
         device.power(target, fast)?;
         Ok(())
     } else {
-        Err(TurnError::DeviceNotFound(device))
+        if CONFIG.find(&state).is_some() && parse_state(&device).is_ok() {
+            turn(state, device, fast)
+        } else {
+            Err(TurnError::DeviceNotFound(device))
+        }
     }
 }
