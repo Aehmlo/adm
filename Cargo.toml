@@ -5,6 +5,16 @@ authors = ["Alex Hamilton <alex.hamilton@ou.edu>"]
 edition = "2018"
 description = "Smart device management utility."
 license = "Apache-2.0/MIT"
+readme = "README.md"
+repository = "https://github.com/Aehmlo/adm"
+documentation = "https://docs.rs/adm"
+keywords = ["iot", "smart", "device"]
+categories = ["command-line-utilities"]
+
+[badges]
+travis-ci = { repository = "Aehmlo/adm", branch = "master" }
+
+maintenance = { status = "experimental" }
 
 [dependencies]
 adm = { path = "adm", version = "0.1.0" }
