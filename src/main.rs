@@ -1,8 +1,8 @@
 use structopt::StructOpt;
 
-use adm::config::CONFIG;
+mod config;
 mod error;
-use self::error::TurnError;
+mod turn;
 
 #[derive(Debug, StructOpt)]
 #[structopt(rename_all = "kebab-case")]
@@ -18,28 +18,26 @@ enum Command {
         #[structopt(short, long)]
         fast: bool,
     },
+    /// Manage configuration settings/files.
+    Config {
+        #[structopt(subcommand)]
+        command: config::ConfigCommand,
+    },
 }
 
-fn parse_state<S: ToString>(s: &S) -> Result<bool, TurnError> {
-    let lower = s.to_string().to_ascii_lowercase();
-    match lower.as_str() {
-        "on" | "1" => Ok(true),
-        "off" | "0" => Ok(false),
-        _ => Err(TurnError::UnrecognizedState(lower)),
-    }
-}
-
-fn main() -> Result<(), TurnError> {
-    let Command::Turn {
-        device,
-        state,
-        fast,
-    } = Command::from_args();
-    if let Some(device) = CONFIG.find(&device) {
-        let target = parse_state(&state)?;
-        device.power(target, fast)?;
-        Ok(())
-    } else {
-        Err(TurnError::DeviceNotFound(device))
+fn main() -> Result<(), error::Error> {
+    match Command::from_args() {
+        Command::Turn {
+            device,
+            state,
+            fast,
+        } => {
+            turn::turn(device, state, fast)?;
+            Ok(())
+        }
+        Command::Config { command } => {
+            config::config(command)?;
+            Ok(())
+        }
     }
 }
