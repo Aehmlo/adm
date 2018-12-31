@@ -3,6 +3,8 @@ name = "adm-cli"
 version = "0.1.0"
 authors = ["Alex Hamilton <alex.hamilton@ou.edu>"]
 edition = "2018"
+description = "Smart device management utility."
+license = "Apache-2.0/MIT"
 
 [dependencies]
 adm = { path = "adm", version = "0.1.0" }

@@ -3,6 +3,8 @@ name = "adm"
 version = "0.1.0"
 authors = ["Alex Hamilton <alex.hamilton@ou.edu>"]
 edition = "2018"
+description = "Smart device management library."
+license = "Apache-2.0/MIT"
 
 [dependencies]
 serde = "1.0.83"
