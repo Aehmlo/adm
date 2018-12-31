@@ -1,6 +1,6 @@
 //! Configuration file parsing.
 
-use std::{fs::read_to_string, io};
+use std::{fmt, fs::read_to_string, io};
 
 use crate::device::*;
 
@@ -24,13 +24,50 @@ pub struct Config {
     pub(crate) lifx_secret: Option<String>,
 }
 
+/// Represents an error encountered while reading and parsing a config file.
+///
+/// These errors come in two flavors: I/O errors and parsing errors.
+#[derive(Debug)]
+pub enum Error {
+    /// An I/O error occurred.
+    Io(io::Error),
+    /// A TOML parsing error occured.
+    Toml(toml::de::Error),
+}
+
+impl From<io::Error> for Error {
+    fn from(err: io::Error) -> Self {
+        Error::Io(err)
+    }
+}
+
+impl From<toml::de::Error> for Error {
+    fn from(err: toml::de::Error) -> Self {
+        Error::Toml(err)
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::Error::*;
+        match self {
+            Io(err) => write!(f, "I/O error: {}", err),
+            Toml(err) => write!(f, "Parse error: {}", err),
+        }
+    }
+}
+
+impl std::error::Error for Error {}
+
 impl Config {
     /// Loads the config file from ~/.adm/config.toml.
-    pub fn parse() -> Result<Self, io::Error> {
-        let mut config_path = dirs::home_dir().unwrap();
-        config_path.push(".adm/config.toml");
+    pub fn parse() -> Result<Self, Error> {
+        let config_path = dirs::home_dir()
+            .expect("Failed to get home directory?")
+            .join(".adm/config.toml");
         let s = read_to_string(config_path)?;
-        Ok(toml::from_str(&s).unwrap())
+        let config = toml::from_str(&s)?;
+        Ok(config)
     }
     /// Finds the specified device in the list of configured devices.
     pub fn find<'a, S: ToString>(&'a self, s: S) -> Option<&'a Device> {
