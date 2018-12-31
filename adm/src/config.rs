@@ -1,6 +1,11 @@
 //! Configuration file parsing.
 
-use std::{fmt, fs::read_to_string, io};
+use std::{
+    fmt,
+    fs::{read_to_string, write},
+    io,
+    path::PathBuf,
+};
 
 use crate::device::*;
 
@@ -16,12 +21,13 @@ lazy_static! {
     pub static ref CONFIG: Config = Config::parse().expect("Failed to parse config file.");
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Config {
     /// The user's configured devices.
     pub devices: Vec<Device>,
-    pub(crate) lifx_secret: Option<String>,
+    /// The user's LIFX API secret.
+    pub lifx_secret: Option<String>,
 }
 
 /// Represents an error encountered while reading and parsing a config file.
@@ -60,14 +66,22 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {}
 
 impl Config {
+    fn path() -> PathBuf {
+        dirs::home_dir()
+            .expect("Failed to get home directory?")
+            .join(".adm/config.toml")
+    }
     /// Loads the config file from ~/.adm/config.toml.
     pub fn parse() -> Result<Self, Error> {
-        let config_path = dirs::home_dir()
-            .expect("Failed to get home directory?")
-            .join(".adm/config.toml");
-        let s = read_to_string(config_path)?;
+        let s = read_to_string(Self::path())?;
         let config = toml::from_str(&s)?;
         Ok(config)
+    }
+    /// Writes the updated config file to ~/.adm/config.toml.
+    pub fn write(&self) -> Result<(), io::Error> {
+        let s = toml::to_string_pretty(self).expect("Failed to serialize config as TOML.");
+        write(Self::path(), s)?;
+        Ok(())
     }
     /// Finds the specified device in the list of configured devices.
     pub fn find<'a, S: ToString>(&'a self, s: S) -> Option<&'a Device> {

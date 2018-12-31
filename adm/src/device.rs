@@ -4,7 +4,7 @@ use lifxi::http::prelude::*;
 // TODO: Add result wrapper.
 type Result = lifxi::http::ClientResult;
 
-#[derive(Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(tag = "type")]
 pub enum Type {
     /// A [LIFX](https://lifx.com) light bulb.
@@ -15,7 +15,7 @@ pub enum Type {
 }
 
 /// The bread and butter of the device manager.
-#[derive(Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Device {
     /// The device type and any appropriate configuration.
     #[serde(flatten)]
