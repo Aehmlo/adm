@@ -1,5 +1,7 @@
 # `adm`
 
+[![Build Status](https://travis-ci.com/Aehmlo/adm.svg?branch=master)](https://travis-ci.com/Aehmlo/adm)
+
 Short for "Alex's Device Manager," `adm` is a set of tools for smart home automation.
 
 Currently, only LIFX bulbs are supported, and only the CLI is useful, but this will change as my own needs evolve.
