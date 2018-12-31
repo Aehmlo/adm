@@ -72,15 +72,19 @@ impl Config {
     /// Finds the specified device in the list of configured devices.
     pub fn find<'a, S: ToString>(&'a self, s: S) -> Option<&'a Device> {
         let s = s.to_string();
-        // TODO: Allow accessing devices by index as well.
-        self.devices.iter().find(|device| {
-            device.name.eq_ignore_ascii_case(&s)
-                || device
-                    .alternatives
-                    .iter()
-                    .map(|d| d.iter())
-                    .flatten()
-                    .any(|alt| alt.eq_ignore_ascii_case(&s))
-        })
+        self.devices
+            .iter()
+            .enumerate()
+            .find(|(index, device)| {
+                device.name.eq_ignore_ascii_case(&s)
+                    || device
+                        .alternatives
+                        .iter()
+                        .map(|d| d.iter())
+                        .flatten()
+                        .any(|alt| alt.eq_ignore_ascii_case(&s))
+                    || format!("{}", (index + 1)) == s
+            })
+            .map(|(_, d)| d)
     }
 }
