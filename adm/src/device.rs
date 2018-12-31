@@ -15,7 +15,7 @@ pub enum Type {
 }
 
 /// The bread and butter of the device manager.
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize, Eq, PartialEq)]
 pub struct Device {
     /// The device type and any appropriate configuration.
     #[serde(flatten)]

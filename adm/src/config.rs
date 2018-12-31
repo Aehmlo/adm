@@ -88,3 +88,25 @@ impl Config {
             .map(|(_, d)| d)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn find() {
+        let config = toml::from_str::<Config>("[[devices]]\ntype=\"lifx\"\nname=\"foo\"\nselector=\"label:foo\"\n[[devices]]\ntype=\"lifx\"\nname=\"bar\"\nselector=\"label:bar\"\n[[devices]]\ntype=\"lifx\"\nname=\"baz\"\nselector=\"label:baz\"\nalternatives=[\"qux\"]\n").expect("Failed to parse config.");
+        let foo = config.find("foo");
+        assert_eq!(foo.map(|d| d.name.as_str()), Some("foo"));
+        let bar = config.find("bar");
+        assert_eq!(bar.map(|d| d.name.as_str()), Some("bar"));
+        assert_eq!(config.find("2"), bar);
+        let baz = config.find("baz");
+        assert!(baz.is_some());
+        assert_eq!(baz, config.find("qux"));
+        assert!(config.find("label").is_none());
+        assert!(config.find("lifx").is_none());
+        assert!(config.find("").is_none());
+        assert!(config.find("0").is_none());
+        assert!(config.find("4").is_none());
+    }
+}
