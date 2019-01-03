@@ -9,7 +9,7 @@ pub enum Message {
 #[serde(untagged, rename_all = "lowercase")]
 pub enum MqttPayload {
     /// A payload encoding a change in power.
-    Power { state: bool },
+    Power { target: bool },
 }
 
 pub type MqttMessage = (String, MqttPayload);
@@ -19,7 +19,7 @@ impl From<Message> for MqttMessage {
         match message {
             Message::Power { device, target } => (
                 format!("devices/{}/power", device),
-                MqttPayload::Power { state: target },
+                MqttPayload::Power { target },
             ),
         }
     }

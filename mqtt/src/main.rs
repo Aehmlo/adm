@@ -50,7 +50,7 @@ fn main() -> Result<(), Error> {
                         if let Some(device) = CONFIG.find(&device) {
                             if let Ok(payload) = serde_json::from_str(&payload) {
                                 match payload {
-                                    MqttPayload::Power { state } => {
+                                    MqttPayload::Power { target: state } => {
                                         device.power(state, true)?;
                                     }
                                 }
