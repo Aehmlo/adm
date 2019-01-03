@@ -38,6 +38,15 @@ impl Device {
                 .send(),
         }
     }
+    /// Toggles the device.
+    pub fn toggle(&self) -> Result {
+        match &self.r#type {
+            Type::LifxBulb { selector } => crate::config::LIFX_CLIENT
+                .select(selector.clone())
+                .toggle()
+                .send(),
+        }
+    }
 }
 
 #[cfg(test)]

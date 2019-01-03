@@ -15,3 +15,7 @@ pub fn turn(device: String, state: String) -> Result<Option<Message>, TurnError>
         .ok_or_else(|| TurnError::UnrecognizedState(state))
         .map(|target| Some(Message::Power { device, target }))
 }
+
+pub fn toggle(device: String) -> Result<Option<Message>, TurnError> {
+    Ok(Some(Message::Toggle { device }))
+}

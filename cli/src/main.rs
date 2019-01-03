@@ -22,12 +22,17 @@ mod turn;
 #[structopt(rename_all = "kebab-case")]
 enum Command {
     #[structopt(raw(setting = "structopt::clap::AppSettings::DisableVersion"))]
-    /// Manage device power states from the command line.
+    /// Manage device power states.
     Turn {
         /// The device to modify.
         device: String,
         /// The desired state of the device (on or off).
         state: String,
+    },
+    /// Toggle device power states.
+    Toggle {
+        /// The device to toggle.
+        device: String,
     },
     /// Manage configuration settings/files.
     Config {
@@ -39,6 +44,7 @@ enum Command {
 fn main() -> Result<(), error::Error> {
     if let Some(message) = match Command::from_args() {
         Command::Turn { device, state } => turn::turn(device, state)?,
+        Command::Toggle { device } => turn::toggle(device)?,
         Command::Config { command } => {
             config::config(command)?;
             None
@@ -51,7 +57,10 @@ fn main() -> Result<(), error::Error> {
 
 fn send(message: Message) -> Result<(), error::SendError> {
     let message: MqttMessage = message.into();
-    let payload = serde_json::to_string(&message.1)?;
+    let payload = message
+        .1
+        .and_then(|p| serde_json::to_string(&p).ok())
+        .unwrap_or("".to_string());
     let topic = message.0.as_str();
     let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), *MQTT_PORT);
     if let Ok((mut client, rx)) = MqttClient::start(opts) {
