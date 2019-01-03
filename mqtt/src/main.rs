@@ -1,13 +1,12 @@
 use adm::lifxi::http::Error as LifxiError;
 use adm::{
-    config::{CONFIG, MQTT_HOST},
+    config::{CONFIG, MQTT_HOST, MQTT_PORT},
     message::MqttPayload,
 };
 use rumqtt::{error::ConnectError, *};
 use std::result::Result;
 
 const CLIENT_ID: &str = "adm-client";
-const PORT: u16 = 1883;
 
 #[derive(Debug)]
 pub enum Error {
@@ -40,7 +39,7 @@ impl From<ConnectError> for Error {
 }
 
 fn main() -> Result<(), Error> {
-    let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), PORT);
+    let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), *MQTT_PORT);
     let (mut client, rx) = MqttClient::start(opts)?;
     client.subscribe("devices/+/power", QoS::ExactlyOnce)?;
     while let Ok(message) = rx.recv() {

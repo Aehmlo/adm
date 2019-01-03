@@ -1,5 +1,5 @@
 use adm::{
-    config::MQTT_HOST,
+    config::{MQTT_HOST, MQTT_PORT},
     message::{Message, MqttMessage},
 };
 use structopt::StructOpt;
@@ -13,7 +13,6 @@ use rumqtt::*;
 use std::result::Result;
 
 const CLIENT_ID: &str = "adm-cli";
-const PORT: u16 = 1883;
 
 mod config;
 mod error;
@@ -54,7 +53,7 @@ fn send(message: Message) -> Result<(), error::SendError> {
     let message: MqttMessage = message.into();
     let payload = serde_json::to_string(&message.1)?;
     let topic = message.0.as_str();
-    let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), PORT);
+    let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), *MQTT_PORT);
     if let Ok((mut client, rx)) = MqttClient::start(opts) {
         client.subscribe(topic, QoS::AtLeastOnce)?;
         client.publish(topic, QoS::ExactlyOnce, payload)?;

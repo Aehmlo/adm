@@ -17,6 +17,8 @@ lazy_static! {
     pub static ref LIFX_CLIENT: Client = Client::new(LIFX_SECRET.to_string());
     /// The mqtt broker hostname.
     pub static ref MQTT_HOST: String = CONFIG.mqtt_host.clone().expect("MQTT mode used but no host configured.");
+    /// The mqtt broker hostname.
+    pub static ref MQTT_PORT: u16 = CONFIG.mqtt_port.unwrap_or(1883);
     /// The LIFX API token to be used.
     static ref LIFX_SECRET: String = CONFIG.lifx_secret.clone().expect("LIFX devices used without configuring a LIFX secret.");
     /// The parsed configuration file.
@@ -32,6 +34,8 @@ pub struct Config {
     pub lifx_secret: Option<String>,
     /// The user's configured MQTT broker hostname.
     pub mqtt_host: Option<String>,
+    /// The user's configured MQTT broker port (1883 is used if not specified).
+    pub mqtt_port: Option<u16>,
 }
 
 /// Represents an error encountered while reading and parsing a config file.
