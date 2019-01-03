@@ -51,7 +51,7 @@ fn main() -> Result<(), Error> {
                             if let Ok(payload) = serde_json::from_str(&payload) {
                                 match payload {
                                     MqttPayload::Power { state } => {
-                                        device.power(state, false)?;
+                                        device.power(state, true)?;
                                     }
                                 }
                             }
