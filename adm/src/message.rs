@@ -6,7 +6,7 @@ pub enum Message {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "lowercase")]
+#[serde(untagged, rename_all = "lowercase")]
 pub enum MqttPayload {
     /// A payload encoding a change in power.
     Power { state: bool },
