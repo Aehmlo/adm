@@ -1,0 +1,22 @@
+[package]
+name = "adm-cli"
+version = "0.1.0"
+authors = ["Alex Hamilton <alex.hamilton@ou.edu>"]
+edition = "2018"
+description = "Smart device management utility."
+license = "Apache-2.0/MIT"
+readme = "README.md"
+repository = "https://github.com/Aehmlo/adm"
+keywords = ["iot", "smart", "device"]
+categories = ["command-line-utilities"]
+
+[badges]
+travis-ci = { repository = "Aehmlo/adm", branch = "master" }
+
+maintenance = { status = "experimental" }
+
+[dependencies]
+adm = { path = "../adm", version = "0.1.0" }
+structopt = "0.2.14"
+serde = "1.0.83"
+toml = "0.4.10"
