@@ -1,4 +1,19 @@
+use adm::{
+    config::MQTT_HOST,
+    message::{Message, MqttMessage},
+};
 use structopt::StructOpt;
+
+#[cfg(not(feature = "mqtt"))]
+compile_error!(
+    "mqtt is currently the only supported mode.\nPlease compile with the mqtt feature enabled."
+);
+use rumqtt::*;
+// Sigh.
+use std::result::Result;
+
+const CLIENT_ID: &str = "adm-cli";
+const PORT: u16 = 1883;
 
 mod config;
 mod error;
@@ -14,9 +29,6 @@ enum Command {
         device: String,
         /// The desired state of the device (on or off).
         state: String,
-        /// Send requests quickly, without waiting for confirmation.
-        #[structopt(short, long)]
-        fast: bool,
     },
     /// Manage configuration settings/files.
     Config {
@@ -26,18 +38,27 @@ enum Command {
 }
 
 fn main() -> Result<(), error::Error> {
-    match Command::from_args() {
-        Command::Turn {
-            device,
-            state,
-            fast,
-        } => {
-            turn::turn(device, state, fast)?;
-            Ok(())
-        }
+    if let Some(message) = match Command::from_args() {
+        Command::Turn { device, state } => turn::turn(device, state)?,
         Command::Config { command } => {
             config::config(command)?;
-            Ok(())
+            None
         }
+    } {
+        send(message)?;
     }
+    Ok(())
+}
+
+fn send(message: Message) -> Result<(), error::SendError> {
+    let message: MqttMessage = message.into();
+    let payload = serde_json::to_string(&message.1)?;
+    let topic = message.0.as_str();
+    let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), PORT);
+    if let Ok((mut client, rx)) = MqttClient::start(opts) {
+        client.subscribe(topic, QoS::AtLeastOnce)?;
+        client.publish(topic, QoS::ExactlyOnce, payload)?;
+        let _ = rx.recv();
+    }
+    Ok(())
 }

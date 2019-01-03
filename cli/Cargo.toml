@@ -20,3 +20,10 @@ adm = { path = "../adm", version = "0.1.0" }
 structopt = "0.2.14"
 serde = "1.0.83"
 toml = "0.4.10"
+
+rumqtt = { git = "https://github.com/AtherEnergy/rumqtt", optional = true }
+serde_json = { version = "1.0.34", optional = true }
+
+[features]
+default = ["mqtt"]
+mqtt = ["rumqtt", "serde_json"]
