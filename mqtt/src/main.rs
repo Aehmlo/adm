@@ -40,10 +40,11 @@ impl From<ConnectError> for Error {
 }
 
 enum Route {
-    /// The power state of the specified device is being managed.
     Power(String),
-    /// The specified device is being toggled.
     Toggle(String),
+    Brightness(String),
+    Color(String),
+    State(String),
 }
 
 impl Route {
@@ -60,6 +61,9 @@ impl Route {
                             Some(_) => None,
                             None => Some(Power(device)),
                         },
+                        "brightness" => Some(Brightness(device)),
+                        "color" => Some(Color(device)),
+                        "state" => Some(State(device)),
                         _ => None,
                     }
                 })
@@ -69,7 +73,13 @@ impl Route {
     }
 }
 
-const TOPICS: &[&str] = &["devices/+/power", "devices/+/power/toggle"];
+const TOPICS: &[&str] = &[
+    "devices/+/power",
+    "devices/+/power/toggle",
+    "devices/+/brightness",
+    "devices/+/color",
+    "devices/+/state",
+];
 
 fn main() -> Result<(), Error> {
     let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), *MQTT_PORT);
@@ -87,14 +97,50 @@ fn main() -> Result<(), Error> {
                         Route::Power(device) => {
                             if let Some(device) = CONFIG.find(&device) {
                                 if let Ok(payload) = serde_json::from_str(&payload) {
-                                    let MqttPayload::Power { target: state } = payload;
-                                    device.power(state, true)?;
+                                    if let MqttPayload::Power { target: state } = payload {
+                                        device.power(state, true)?;
+                                    }
                                 }
                             }
                         }
                         Route::Toggle(device) => {
                             if let Some(device) = CONFIG.find(&device) {
                                 device.toggle()?;
+                            }
+                        }
+                        Route::Brightness(device) => {
+                            if let Some(device) = CONFIG.find(&device) {
+                                if let Ok(payload) = serde_json::from_str(&payload) {
+                                    if let MqttPayload::State {
+                                        brightness,
+                                        color: _,
+                                    } = payload
+                                    {
+                                        device.set(None, brightness, true)?;
+                                    }
+                                }
+                            }
+                        }
+                        Route::Color(device) => {
+                            if let Some(device) = CONFIG.find(&device) {
+                                if let Ok(payload) = serde_json::from_str(&payload) {
+                                    if let MqttPayload::State {
+                                        color,
+                                        brightness: _,
+                                    } = payload
+                                    {
+                                        device.set(color, None, true)?;
+                                    }
+                                }
+                            }
+                        }
+                        Route::State(device) => {
+                            if let Some(device) = CONFIG.find(&device) {
+                                if let Ok(payload) = serde_json::from_str(&payload) {
+                                    if let MqttPayload::State { color, brightness } = payload {
+                                        device.set(color, brightness, true)?;
+                                    }
+                                }
                             }
                         }
                     }

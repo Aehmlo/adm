@@ -47,6 +47,39 @@ impl Device {
                 .send(),
         }
     }
+    /// Sets the device color and brightness simultaneously.
+    pub fn set(&self, color: Option<Color>, brightness: Option<f32>, fast: bool) -> Result {
+        let (color, brightness) = match (color, brightness) {
+            (None, Some(b)) => (Some(Color::Brightness(b)), None),
+            p => p,
+        };
+        match &self.r#type {
+            Type::LifxBulb { selector } => {
+                if let Some(c) = color {
+                    if let Some(b) = brightness {
+                        crate::config::LIFX_CLIENT
+                            .select(selector.clone())
+                            .set_state()
+                            .color(c)
+                            .brightness(b)
+                            .power(true)
+                            .fast(fast)
+                            .send()
+                    } else {
+                        crate::config::LIFX_CLIENT
+                            .select(selector.clone())
+                            .set_state()
+                            .color(c)
+                            .power(true)
+                            .fast(fast)
+                            .send()
+                    }
+                } else {
+                    self.power(true, fast)
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
