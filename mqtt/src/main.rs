@@ -55,8 +55,11 @@ impl Route {
                 parts.next().and_then(|action| {
                     let device = device.to_string();
                     match action {
-                        "power" => Some(Power(device)),
-                        "toggle" => Some(Toggle(device)),
+                        "power" => match parts.next() {
+                            Some("toggle") => Some(Toggle(device)),
+                            Some(_) => None,
+                            None => Some(Power(device)),
+                        },
                         _ => None,
                     }
                 })
@@ -66,7 +69,7 @@ impl Route {
     }
 }
 
-const TOPICS: &[&str] = &["devices/+/power", "devices/+/toggle"];
+const TOPICS: &[&str] = &["devices/+/power", "devices/+/power/toggle"];
 
 fn main() -> Result<(), Error> {
     let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), *MQTT_PORT);

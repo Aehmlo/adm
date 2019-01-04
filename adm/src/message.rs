@@ -23,7 +23,7 @@ impl From<Message> for MqttMessage {
                 format!("devices/{}/power", device),
                 Some(MqttPayload::Power { target }),
             ),
-            Message::Toggle { device } => (format!("devices/{}/toggle", device), None),
+            Message::Toggle { device } => (format!("devices/{}/power/toggle", device), None),
         }
     }
 }
