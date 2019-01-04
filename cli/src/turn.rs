@@ -11,9 +11,13 @@ fn power_state<S: ToString>(s: &S) -> Option<bool> {
 }
 
 pub fn turn(device: String, state: String) -> Result<Option<Message>, TurnError> {
-    power_state(&state)
-        .ok_or_else(|| TurnError::UnrecognizedState(state))
-        .map(|target| Some(Message::Power { device, target }))
+    if let Some(target) = power_state(&state) {
+        Ok(Some(Message::Power { device, target }))
+    } else if power_state(&device).is_some() {
+        turn(state, device)
+    } else {
+        Err(TurnError::UnrecognizedState(state))
+    }
 }
 
 pub fn toggle(device: String) -> Result<Option<Message>, TurnError> {
