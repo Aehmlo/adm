@@ -66,11 +66,14 @@ impl Route {
     }
 }
 
+const TOPICS: &[&str] = &["devices/+/power", "devices/+/toggle"];
+
 fn main() -> Result<(), Error> {
     let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), *MQTT_PORT);
     let (mut client, rx) = MqttClient::start(opts)?;
-    client.subscribe("devices/+/power", QoS::ExactlyOnce)?;
-    client.subscribe("devices/+/toggle", QoS::ExactlyOnce)?;
+    for topic in TOPICS {
+        client.subscribe(*topic, QoS::ExactlyOnce)?;
+    }
     while let Ok(message) = rx.recv() {
         if let Notification::Publish(body) = message {
             let topic = body.topic_name;
