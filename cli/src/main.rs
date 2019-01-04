@@ -60,7 +60,7 @@ fn send(message: Message) -> Result<(), error::SendError> {
     let payload = message
         .1
         .and_then(|p| serde_json::to_string(&p).ok())
-        .unwrap_or("".to_string());
+        .unwrap_or_else(|| "".to_string());
     let topic = message.0.as_str();
     let opts = MqttOptions::new(CLIENT_ID, MQTT_HOST.to_string(), *MQTT_PORT);
     if let Ok((mut client, rx)) = MqttClient::start(opts) {

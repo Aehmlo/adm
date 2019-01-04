@@ -9,6 +9,7 @@ use std::result::Result;
 const CLIENT_ID: &str = "adm-client";
 
 #[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum Error {
     /// An error was encountered while starting the client.
     ClientStart(ClientError),
@@ -71,35 +72,28 @@ fn main() -> Result<(), Error> {
     client.subscribe("devices/+/power", QoS::ExactlyOnce)?;
     client.subscribe("devices/+/toggle", QoS::ExactlyOnce)?;
     while let Ok(message) = rx.recv() {
-        match message {
-            Notification::Publish(body) => {
-                let topic = body.topic_name;
-                let payload = body.payload.to_vec();
-                if let Ok(payload) = String::from_utf8(payload) {
-                    if let Some(route) = Route::try_parse(&topic) {
-                        match route {
-                            Route::Power(device) => {
-                                if let Some(device) = CONFIG.find(&device) {
-                                    if let Ok(payload) = serde_json::from_str(&payload) {
-                                        match payload {
-                                            MqttPayload::Power { target: state } => {
-                                                device.power(state, true)?;
-                                            }
-                                            _ => {}
-                                        }
-                                    }
+        if let Notification::Publish(body) = message {
+            let topic = body.topic_name;
+            let payload = body.payload.to_vec();
+            if let Ok(payload) = String::from_utf8(payload) {
+                if let Some(route) = Route::try_parse(&topic) {
+                    match route {
+                        Route::Power(device) => {
+                            if let Some(device) = CONFIG.find(&device) {
+                                if let Ok(payload) = serde_json::from_str(&payload) {
+                                    let MqttPayload::Power { target: state } = payload;
+                                    device.power(state, true)?;
                                 }
                             }
-                            Route::Toggle(device) => {
-                                if let Some(device) = CONFIG.find(&device) {
-                                    device.toggle()?;
-                                }
+                        }
+                        Route::Toggle(device) => {
+                            if let Some(device) = CONFIG.find(&device) {
+                                device.toggle()?;
                             }
                         }
                     }
                 }
             }
-            _ => {}
         }
     }
     Err(Error::Poll)

@@ -6,6 +6,7 @@ use adm::lifxi::http::Error as LifxiClientError;
 
 /// Represents an error encountered while sending an MQTT message.
 #[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum SendError {
     /// The payload could not be serialized.
     Serialize(serde_json::Error),
@@ -95,6 +96,7 @@ impl ErrorT for ConfigError {}
 
 /// A general error type.
 #[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum Error {
     /// An error encountered when using the `turn` subcommand.
     Turn(TurnError),
