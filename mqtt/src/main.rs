@@ -97,8 +97,8 @@ fn main() -> Result<(), Error> {
                         Route::Power(device) => {
                             if let Some(device) = CONFIG.find(&device) {
                                 if let Ok(payload) = serde_json::from_str(&payload) {
-                                    if let MqttPayload::Power { target: state } = payload {
-                                        device.power(state, true)?;
+                                    if let MqttPayload::Power { power } = payload {
+                                        device.power(power, true)?;
                                     }
                                 }
                             }
