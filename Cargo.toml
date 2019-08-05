@@ -1,0 +1,19 @@
+[package]
+name = "adm"
+version = "0.1.0"
+authors = ["Alex Hamilton <alex.hamilton@ou.edu>"]
+edition = "2018"
+description = "Smart device management library."
+license = "Apache-2.0/MIT"
+readme = "README.md"
+repository = "https://github.com/Aehmlo/adm"
+documentation = "https://docs.rs/adm"
+keywords = ["iot", "smart", "device"]
+
+[badges]
+travis-ci = { repository = "Aehmlo/adm", branch = "master" }
+
+maintenance = { status = "experimental" }
+
+[dependencies]
+futures-preview = "0.2.2"
