@@ -5,7 +5,7 @@ pub trait Message {}
 
 /// A device which can act to change its environment.
 ///
-/// A sensor may be thought of as an asynchronous message sink.
+/// An effector may be thought of as an asynchronous message sink.
 pub trait Effector<M>: Sink<SinkItem = M>
 where
     M: Message,
